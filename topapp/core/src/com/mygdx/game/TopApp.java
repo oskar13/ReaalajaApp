@@ -18,23 +18,30 @@ public class TopApp extends ApplicationAdapter {
 		img = new Texture("assets/doge.png");
 	}
 	int i =1;
+	Boolean pomf= false;
 	
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		batch.draw(img, 0, 0);
-		batch.draw(img, 0, 4+i);
-		batch.draw(img, 0, 8-i);
+		batch.draw(img, Gdx.input.getX() , -Gdx.input.getY());
+		batch.draw(img, 0, i);
+		batch.draw(img, 0, -i);
 		batch.draw(img, 445, 0);
 		batch.setColor( new Color(0.4f, 0.4f, 0.4f, 0.4f));
 		
+		   System.out.println("Normal getX(): " + Gdx.input.getX()); // Print: Normal getX(): "SomeNumber" and Unproject X: "SomeNumber"
+		   System.out.println("Normal getY(): " + Gdx.input.getY()); // Print: Normal getY(): "SomeNumber" and Unproject Y: "SomeNumber"
 		
 		
-		if (i>4) {
+		if (i>10 || pomf) {
+			pomf = true;
 			i-=1;
+			if (i<10) {
+				pomf = false;
+			}
 		} else {
 			i+=1;
 		}
