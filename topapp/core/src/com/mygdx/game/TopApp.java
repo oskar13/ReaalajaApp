@@ -18,6 +18,8 @@ public class TopApp extends ApplicationAdapter {
 		img = new Texture("assets/doge.png");
 	}
 	int i =1;
+	int dogex=1;
+	int dogey=1;
 	Boolean pomf= false;
 	
 
@@ -29,17 +31,31 @@ public class TopApp extends ApplicationAdapter {
 		batch.draw(img, Gdx.input.getX() , -Gdx.input.getY());
 		batch.draw(img, 0, i);
 		batch.draw(img, 0, -i);
-		batch.draw(img, 445, 0);
+		batch.draw(img, dogex, -dogey);
 		batch.setColor( new Color(0.4f, 0.4f, 0.4f, 0.4f));
 		
-		   System.out.println("Normal getX(): " + Gdx.input.getX()); // Print: Normal getX(): "SomeNumber" and Unproject X: "SomeNumber"
-		   System.out.println("Normal getY(): " + Gdx.input.getY()); // Print: Normal getY(): "SomeNumber" and Unproject Y: "SomeNumber"
+		   System.out.println("Normal getX(): " + Gdx.input.getX()); 
+		   System.out.println("Normal getY(): " + Gdx.input.getY()); 
+		   
+
+		
+		if (dogex < Gdx.input.getX()) {
+			dogex+=1;
+		} else if (dogex > Gdx.input.getX()) {
+			dogex-=1;
+		}
+		
+		if (dogey > Gdx.input.getY()) {
+			dogey-=1;
+		} else if (dogey < Gdx.input.getY()) {
+			dogey+=1;
+		}
 		
 		
-		if (i>10 || pomf) {
+		if (i>3 || pomf) {
 			pomf = true;
 			i-=1;
-			if (i<10) {
+			if (i<0) {
 				pomf = false;
 			}
 		} else {
