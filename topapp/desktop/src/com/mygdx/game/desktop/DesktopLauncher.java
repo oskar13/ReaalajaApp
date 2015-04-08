@@ -7,6 +7,17 @@ import com.mygdx.game.TopApp;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		
+		config.title = "Title";
+		//config.useGL20 = true;
+		//config.fullscreen = true;
+		config.height = 720;
+		config.width = 1280;	
+		
 		new LwjglApplication(new TopApp(), config);
+		
+
+		
+
 	}
 }
