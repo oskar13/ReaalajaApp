@@ -120,6 +120,16 @@ public class TopApp extends ApplicationAdapter {
 			
 			
 		}
+		
+		if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+			System.out.println("CLICK!!!!");
+
+			
+	
+			
+			
+		}
+
 
 		
 		//batch.draw(img, x, y, width, height, srcX, srcY, srcWidth, srcHeight, flipX, flipY);
