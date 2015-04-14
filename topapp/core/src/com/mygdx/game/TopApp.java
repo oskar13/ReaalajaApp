@@ -14,21 +14,42 @@ import com.badlogic.gdx.physics.box2d.*;
 
 public class TopApp extends ApplicationAdapter {
 
-	Body body;
+    private SpriteBatch batch;
+    private Texture texture;
+    private Sprite sprite;
 	
-	@Override
-	public void create () {
-			
-	}
+    @Override
+    public void create() {        
+        batch = new SpriteBatch();
+        texture = new Texture(Gdx.files.internal("assets/doge.png"));
+        sprite = new Sprite(texture);
+    }
 
-	 
-	
-	
+    @Override
+    public void dispose() {
+        batch.dispose();
+        texture.dispose();
+    }
 
-	
+    @Override
+    public void render() {        
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        
+        batch.begin();
+        sprite.draw(batch);
+        batch.end();
+    }
 
-	@Override
-	public void render () {
+    @Override
+    public void resize(int width, int height) {
+    }
 
-	}
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
 }
