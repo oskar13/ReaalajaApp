@@ -11,13 +11,15 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 
 public class TopApp extends ApplicationAdapter {
 
-	private World world = new World(new Vector2(0, -10), true); 
+	private World world = new World(new Vector2(0, -300), true); 
 	
 	
     private SpriteBatch batch;
@@ -27,14 +29,18 @@ public class TopApp extends ApplicationAdapter {
     private Tank juku;
     
     public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
-    //public static ArrayList<Player> players = new ArrayList<PPlayer>();
+    
+    public static ArrayList<Tank> players = new ArrayList<Tank>();
+    
+    
+    
     
     
 	
     @Override
     public void create() {        
         batch = new SpriteBatch();
-        texture = new Texture(Gdx.files.internal("assets/doge.png"));
+        texture = new Texture(Gdx.files.internal("assets/tankHull.png"));
         sprite = new Sprite(texture);
         
         juku = new Tank(59, 23);
@@ -58,6 +64,8 @@ public class TopApp extends ApplicationAdapter {
         batch.begin();
         
         //Much main draw loop
+
+        
         
         
         sprite.draw(batch);
@@ -77,7 +85,12 @@ public class TopApp extends ApplicationAdapter {
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
         	
         	System.out.println("BOOM");
-        	projectiles.add( new Projectile(world, juku.getX(), 800f , 4.f,1,1));
+        	
+        	//projectiles.add(juku.shoot(world));
+        	
+        	juku.shoot(world, projectiles);
+        	
+        	//projectiles.add( new Projectile(world, juku.getX(), 800f , 4.f,1,1));
 
         }
         

@@ -1,9 +1,12 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -26,24 +29,21 @@ public class Projectile {
 	
 	// constructor
 	
-	public Projectile(World world, float x, float y /* spawning cordiantes */, float angle /* barrel angle */ , int sx, int sy) {
-		projectileTexture = new Texture(Gdx.files.internal("assets/doge.png"));
+	public Projectile(World world, float shootX, float shootY, float originX, float originY) {
+		projectileTexture = new Texture(Gdx.files.internal("assets/tankWheel.png"));
         projectileSprite = new Sprite(projectileTexture);
         
-        projectileSprite.setSize(projectileSprite.getWidth() * 0.5f,
-        		projectileSprite.getHeight() * 0.5f);
+        //projectileSprite.setSize(projectileSprite.getWidth() * 0.5f,	projectileSprite.getHeight() * 0.5f);
         
         
-        posX = x;
-        posY = y;
-        speedX = sx;
-        speedY = sy;
+
+
         
         
         // We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
         bodyDef.type = BodyType.DynamicBody;
         // Set our body's starting position in the world
-        bodyDef.position.set(posX, posY);
+        bodyDef.position.set(originX, originY);
         
         
         body = world.createBody(bodyDef);
@@ -51,7 +51,7 @@ public class Projectile {
         
         // Create a circle shape and set its radius to 6
         CircleShape circle = new CircleShape();
-        circle.setRadius(50f);
+        circle.setRadius(5f);
 
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
@@ -68,7 +68,16 @@ public class Projectile {
         circle.dispose();
         
         
-        body.applyLinearImpulse(13.0f, 4.3f, posX, posY, true);        
+        body.setLinearVelocity(shootX*1000.0f, shootY*1000.0f);       
+        
+        
+        ShapeRenderer sr = new ShapeRenderer();
+        sr.setColor(Color.BLACK);
+        
+        sr.begin(ShapeType.Line);
+        sr.line(originX, originY, shootX, shootY);
+
+        sr.end();
 	}
 	
 	public void drawProjectile(SpriteBatch batch) {
