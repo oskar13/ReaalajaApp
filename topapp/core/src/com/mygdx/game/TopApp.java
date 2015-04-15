@@ -15,12 +15,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 
 
 public class TopApp extends ApplicationAdapter {
 
 	private World world = new World(new Vector2(0, -300), true); 
-	
+	private OrthographicCamera camera;
 	
     private SpriteBatch batch;
     private Texture texture;
@@ -36,12 +37,14 @@ public class TopApp extends ApplicationAdapter {
     
     
     
+    
 	
     @Override
     public void create() {        
         batch = new SpriteBatch();
         texture = new Texture(Gdx.files.internal("assets/tankHull.png"));
         sprite = new Sprite(texture);
+        camera = new OrthographicCamera(1280, 720);
         
         juku = new Tank(59, 23);
         
@@ -61,6 +64,8 @@ public class TopApp extends ApplicationAdapter {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
+        
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
         
         //Much main draw loop
@@ -75,6 +80,9 @@ public class TopApp extends ApplicationAdapter {
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
 
         	juku.driveForward();
+        	camera.translate(1f, 1f);
+
+            camera.update();
         }
         
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
@@ -126,5 +134,17 @@ public class TopApp extends ApplicationAdapter {
 
     @Override
     public void resume() {
+    }
+    
+    public boolean pan(float x, float y, float deltaX, float deltaY) {
+
+       // TODO Auto-generated method stub
+
+       camera.translate(deltaX,0);
+
+       camera.update();
+
+       return false;
+
     }
 }

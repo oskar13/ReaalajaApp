@@ -47,6 +47,7 @@ public class Projectile {
         
         
         body = world.createBody(bodyDef);
+
         
         
         // Create a circle shape and set its radius to 6
@@ -60,6 +61,7 @@ public class Projectile {
         fixtureDef.friction = 0.4f;
         fixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
+
         // Create our fixture and attach it to the body
         Fixture fixture = body.createFixture(fixtureDef);
 
@@ -68,7 +70,7 @@ public class Projectile {
         circle.dispose();
         
         
-        body.setLinearVelocity(shootX*1000.0f, shootY*1000.0f);       
+        body.applyLinearImpulse(shootX*1000.0f, shootY*1000.0f, 9999999999f , 9999999999f , true           );       
         
         
         ShapeRenderer sr = new ShapeRenderer();
