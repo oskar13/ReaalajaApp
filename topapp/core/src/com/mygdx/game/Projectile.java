@@ -88,7 +88,8 @@ public class Projectile {
         System.out.println("Mouse pos game X" +  TopApp.getWorldMouse().x + "   Y " +  TopApp.getWorldMouse().y );
         
         
-        body.applyLinearImpulse(originX, originY, TopApp.getWorldMouse().x , TopApp.getWorldMouse().y , true);
+        //body.applyLinearImpulse(TopApp.getWorldMouse().x, TopApp.getWorldMouse().y,originX, originY,  true);
+        body.setLinearVelocity((TopApp.getWorldMouse().x - originX)/100f, (TopApp.getWorldMouse().y - originY)/100f);
 
         
 

@@ -146,7 +146,7 @@ public class Tank {
     	barrelSprite.setRotation(getAngle((body.getPosition().x * PIXELS_TO_METERS)+hullSprite.getWidth()/2, (body.getPosition().y * PIXELS_TO_METERS)+hullSprite.getHeight()/2, TopApp.getWorldMouse().x, TopApp.getWorldMouse().y));
     	
     	
-System.out.println(getAngle((body.getPosition().x * PIXELS_TO_METERS)+hullSprite.getWidth()/2, (body.getPosition().y * PIXELS_TO_METERS)+hullSprite.getHeight()/2, TopApp.getWorldMouse().x, TopApp.getWorldMouse().y));
+//System.out.println(getAngle((body.getPosition().x * PIXELS_TO_METERS)+hullSprite.getWidth()/2, (body.getPosition().y * PIXELS_TO_METERS)+hullSprite.getHeight()/2, TopApp.getWorldMouse().x, TopApp.getWorldMouse().y));
     	
     	
     	
