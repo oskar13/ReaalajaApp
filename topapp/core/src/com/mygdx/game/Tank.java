@@ -3,6 +3,7 @@ package com.mygdx.game;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -12,11 +13,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 
 public class Tank {
 	
@@ -25,6 +30,11 @@ public class Tank {
     
     private Texture barrelTexture;
     private Sprite barrelSprite;
+    
+    
+    private Texture wheel1Texture;
+    private Sprite wheel1Sprite;
+    private Sprite wheel2Sprite;
    
     
     private int fireRate = 10;
@@ -32,6 +42,11 @@ public class Tank {
     
     private BodyDef bodyDef = new BodyDef();
     private Body body;
+    
+    
+    private Body wheel1, wheel2;
+    private Joint motor1;
+    
     
     final float PIXELS_TO_METERS = 100f;
     
@@ -44,6 +59,10 @@ public class Tank {
         barrelTexture = new Texture(Gdx.files.internal("assets/tankBarrel.png"));
         barrelSprite = new Sprite(barrelTexture);
         
+        wheel1Texture = new Texture(Gdx.files.internal("assets/tankWheel.png"));
+        wheel1Sprite = new Sprite(wheel1Texture);
+        wheel2Sprite = new Sprite(wheel1Texture);
+        
         
         // We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
         bodyDef.type = BodyType.DynamicBody;
@@ -55,18 +74,30 @@ public class Tank {
         
         
         body = world.createBody(bodyDef);
+        
+        bodyDef.position.set(x / PIXELS_TO_METERS,  y / PIXELS_TO_METERS);
+        wheel1 = world.createBody(bodyDef);
+        wheel2 = world.createBody(bodyDef);
 
+        CircleShape circle = new CircleShape();
+        circle.setRadius(wheel1Sprite.getWidth()/2/ PIXELS_TO_METERS);
         
+        // Create a fixture definition to apply our shape to
+        FixtureDef fixtureDefWheel = new FixtureDef();
+        fixtureDefWheel.shape = circle;
+        fixtureDefWheel.density = 10f; 
+        fixtureDefWheel.friction = 0.9f;
+        fixtureDefWheel.restitution = 0.2f; // Make it bounce a little bit
         
-        // Create a circle shape and set its radius to 6
-        //CircleShape circle = new CircleShape();
-        //circle.setRadius(0.5f);
+     // Create our fixture and attach it to the body
+        wheel1.createFixture(fixtureDefWheel);
+        wheel2.createFixture(fixtureDefWheel);
+        
+        circle.dispose();
+        
         
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(hullSprite.getWidth()/2 / PIXELS_TO_METERS, hullSprite.getHeight()/2 / PIXELS_TO_METERS);
-        
-        
-        
 
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
@@ -77,9 +108,33 @@ public class Tank {
 
 
         // Create our fixture and attach it to the body
-        Fixture fixture = body.createFixture(fixtureDef);
+        body.createFixture(fixtureDef);
         
         barrelSprite.setOrigin(0f, barrelSprite.getHeight()/2);
+        
+        
+        
+        
+        
+
+        RevoluteJointDef rjd=new RevoluteJointDef();
+        rjd.bodyA=body;
+        rjd.bodyB=wheel1;
+        rjd.localAnchorA.set(hullSprite.getWidth()/3 / PIXELS_TO_METERS,-hullSprite.getHeight()/2 / PIXELS_TO_METERS);
+        rjd.localAnchorB.set(0,0);
+        rjd.collideConnected=false;
+        world.createJoint(rjd);
+        
+        rjd.bodyA=body;
+        rjd.bodyB=wheel2;
+        rjd.localAnchorA.set(-hullSprite.getWidth()/3 / PIXELS_TO_METERS,-hullSprite.getHeight()/2 / PIXELS_TO_METERS);
+        rjd.localAnchorB.set(0,0);
+        rjd.collideConnected=false;
+        world.createJoint(rjd);
+
+
+
+        
     }
     
     public void drawTank(SpriteBatch batch) {
@@ -88,10 +143,10 @@ public class Tank {
     	
     	barrelSprite.setY(body.getPosition().y+hullSprite.getHeight()/2);
     	barrelSprite.setX(body.getPosition().x+hullSprite.getWidth()/2);
-    	barrelSprite.setRotation(getAngle(body.getPosition().x+hullSprite.getWidth()/2, body.getPosition().y+hullSprite.getHeight()/2, Gdx.input.getX(), Gdx.graphics.getHeight()-Gdx.input.getY()));
+    	barrelSprite.setRotation(getAngle((body.getPosition().x * PIXELS_TO_METERS)+hullSprite.getWidth()/2, (body.getPosition().y * PIXELS_TO_METERS)+hullSprite.getHeight()/2, TopApp.getWorldMouse().x, TopApp.getWorldMouse().y));
     	
     	
-
+System.out.println(getAngle((body.getPosition().x * PIXELS_TO_METERS)+hullSprite.getWidth()/2, (body.getPosition().y * PIXELS_TO_METERS)+hullSprite.getHeight()/2, TopApp.getWorldMouse().x, TopApp.getWorldMouse().y));
     	
     	
     	
@@ -102,20 +157,41 @@ public class Tank {
     	
     	
     	
+    	wheel1Sprite.setPosition((wheel1.getPosition().x * PIXELS_TO_METERS) - wheel1Sprite.getWidth()/2 ,
+    	        (wheel1.getPosition().y * PIXELS_TO_METERS) -wheel1Sprite.getHeight()/2 );
+    	wheel1Sprite.setRotation((float)Math.toDegrees(wheel1.getAngle()));
+    	
+    	wheel2Sprite.setPosition((wheel2.getPosition().x * PIXELS_TO_METERS) - wheel2Sprite.getWidth()/2 ,
+    	        (wheel2.getPosition().y * PIXELS_TO_METERS) -wheel2Sprite.getHeight()/2 );
+    	wheel2Sprite.setRotation((float)Math.toDegrees(wheel2.getAngle()));
+    	
+    	
+    	
 
     	
     	barrelSprite.setPosition((body.getPosition().x * PIXELS_TO_METERS) ,
     	        (body.getPosition().y * PIXELS_TO_METERS) );
     	
     	
-    	Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-        //TopApp.camera.unproject(mousePos).x
+
     	
-    	barrelSprite.setRotation(getAngle(body.getPosition().x * PIXELS_TO_METERS, body.getPosition().y * PIXELS_TO_METERS, TopApp.camera.unproject(mousePos).x, Gdx.graphics.getHeight()-TopApp.camera.unproject(mousePos).y));
-    
+    	barrelSprite.setRotation(getAngle(body.getPosition().x * PIXELS_TO_METERS, body.getPosition().y * PIXELS_TO_METERS, TopApp.getWorldMouse().x, TopApp.getWorldMouse().y));
+
+    	
+    	
+    	
+
+    		wheel1.applyTorque(0.01f, true);
+
+
+    	
+    	
     	
     	barrelSprite.draw(batch);
     	hullSprite.draw(batch);
+    	
+    	wheel1Sprite.draw(batch);
+    	wheel2Sprite.draw(batch);
     	
     	
     	
@@ -123,6 +199,7 @@ public class Tank {
     		fireRateCooldown -= 1;
     	} 
     	
+
 
     }
     

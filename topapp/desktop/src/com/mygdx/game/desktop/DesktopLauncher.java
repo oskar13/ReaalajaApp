@@ -12,7 +12,7 @@ public class DesktopLauncher {
 		//config.useGL20 = true;
 		//config.fullscreen = true;
 		config.height = 720;
-		config.width = 2880;	
+		config.width = 1920;	
 		
 		new LwjglApplication(new TopApp(), config);
 		

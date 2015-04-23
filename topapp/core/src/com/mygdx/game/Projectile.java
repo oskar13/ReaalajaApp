@@ -83,13 +83,12 @@ public class Projectile {
         //circle.dispose();
         
         
-        Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-        TopApp.camera.unproject(mousePos).y = Gdx.graphics.getHeight()-TopApp.camera.unproject(mousePos).y ;
+        
 
-        System.out.println("Mouse pos game X" +  TopApp.camera.unproject(mousePos).x + "   Y " +  TopApp.camera.unproject(mousePos).y );
+        System.out.println("Mouse pos game X" +  TopApp.getWorldMouse().x + "   Y " +  TopApp.getWorldMouse().y );
         
         
-        body.applyLinearImpulse(originX, originY, TopApp.camera.unproject(mousePos).x , TopApp.camera.unproject(mousePos).y , true);
+        body.applyLinearImpulse(originX, originY, TopApp.getWorldMouse().x , TopApp.getWorldMouse().y , true);
 
         
 

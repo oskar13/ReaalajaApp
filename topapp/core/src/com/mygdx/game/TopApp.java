@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
@@ -411,6 +412,14 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
     @Override
     public boolean scrolled(int amount) {
         return false;
+    }
+    
+    public static Vector2 getWorldMouse(){
+    	Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        
+        
+        return new Vector2(camera.unproject(mousePos).x, Gdx.graphics.getHeight()/2-camera.unproject(mousePos).y);
+    	
     }
 	    
 }
