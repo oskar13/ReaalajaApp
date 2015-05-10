@@ -1,24 +1,20 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-public class Projectile {
+public class Target {
+	
+
 	private int mass;
 	private float posX;
 	private float posY;
@@ -34,8 +30,8 @@ public class Projectile {
 	
 	// constructor
 	
-	public Projectile(World world, float originX, float originY) {
-		projectileTexture = new Texture(Gdx.files.internal("assets/tankWheel.png"));
+	public Target(World world, float originX, float originY) {
+		projectileTexture = new Texture(Gdx.files.internal("assets/doge2.png"));
         projectileSprite = new Sprite(projectileTexture);
         
         //projectileSprite.setSize(projectileSprite.getWidth() * 0.5f,	projectileSprite.getHeight() * 0.5f);
@@ -46,7 +42,7 @@ public class Projectile {
         
         
         // We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
-        bodyDef.type = BodyType.DynamicBody;
+        bodyDef.type = BodyType.StaticBody;
         // Set our body's starting position in the world
         //bodyDef.position.set(originX, originY);
         
@@ -55,6 +51,7 @@ public class Projectile {
         
         
         body = world.createBody(bodyDef);
+        
         
         
         
@@ -87,17 +84,9 @@ public class Projectile {
         //circle.dispose();
         
         
-        
-
-        System.out.println("Mouse pos game X" +  TopApp.getWorldMouse().x + "   Y " +  TopApp.getWorldMouse().y );
-        
-        
-        //body.applyLinearImpulse(TopApp.getWorldMouse().x, TopApp.getWorldMouse().y,originX, originY,  true);
-        body.setLinearVelocity((TopApp.getWorldMouse().x - originX)/100f, (TopApp.getWorldMouse().y - originY)/100f);
+        body.setUserData(new MyUserTags(2)); 
 
         
-        
-        body.setUserData(new MyUserTags(1)); 
 
 	}
 	
@@ -127,4 +116,5 @@ public class Projectile {
 		
 	}
 	
+
 }

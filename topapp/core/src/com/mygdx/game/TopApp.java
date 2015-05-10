@@ -3,6 +3,9 @@ package com.mygdx.game;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -23,7 +26,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
 
-public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
+public class TopApp  extends ApplicationAdapter implements InputProcessor{/*
 
 	private World world = new World(new Vector2(0, -300), true); 
 	private OrthographicCamera camera;
@@ -162,8 +165,13 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
     Matrix4 debugMatrix;
     public static OrthographicCamera camera;
     BitmapFont font;
-    
+    AdmebaasiYhendus abyhendus;
+    String nimi = "Anon";    
     private Tank juku;
+    private Target target;
+    WriteText tekstiKirjutaja;
+    
+    public static int Skoor = 0;
     
     public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 
@@ -171,18 +179,32 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
     float torque = 0.0f;
     boolean drawSprite = true;
 
+    
+    
     final float PIXELS_TO_METERS = 100f;
+    
+    int timeleft;
 
     @Override
     public void create() {
+    	
+    	timeleft = 60*30;
+    	
+    	
+    	abyhendus = new AdmebaasiYhendus();
+    	
+    	
 
         batch = new SpriteBatch();
         img = new Texture("assets/doge.png");
         sprite = new Sprite(img);
 
-        sprite.setPosition(-sprite.getWidth()/2,-sprite.getHeight()/2);
+        //sprite.setPosition(-sprite.getWidth()/2,-sprite.getHeight()/2);
+        
+        sprite.setPosition(7777, 7777);
 
         world = new World(new Vector2(0, -1f),true);
+        world.setContactListener(new ListenerClass());
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -216,12 +238,53 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
         FixtureDef fixtureDef2 = new FixtureDef();
 
         EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(-w/2,-h/2,w/2,-h/2);
+        edgeShape.set(-w/2+15,-h/2,w/2,-h/2);
         fixtureDef2.shape = edgeShape;
 
         bodyEdgeScreen = world.createBody(bodyDef2);
         bodyEdgeScreen.createFixture(fixtureDef2);
         edgeShape.dispose();
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        BodyDef bodyDef3 = new BodyDef();
+        bodyDef3.type = BodyDef.BodyType.StaticBody;
+
+        // Set the height to just 50 pixels above the bottom of the screen so we can see the edge in the
+        // debug renderer
+
+        //bodyDef2.position.set(0,
+//                h-10/PIXELS_TO_METERS);
+        bodyDef3.position.set(0,0);
+        FixtureDef fixtureDef3 = new FixtureDef();
+
+        EdgeShape edgeShape2 = new EdgeShape();
+        edgeShape2.set(-w/2+15,-h/2,1,1);
+        fixtureDef3.shape = edgeShape2;
+
+        bodyEdgeScreen = world.createBody(bodyDef3);
+        bodyEdgeScreen.createFixture(fixtureDef3);
+        edgeShape2.dispose();
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
         Gdx.input.setInputProcessor(this);
 
@@ -233,12 +296,52 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
         
         
         
-        juku = new Tank(world,50, 30);
+        
+        
+        target = new Target(world, -900, 144);
+        
+        
+        
+        juku = new Tank(world,700, 30);
+        
+        
+        JFrame frame = new JFrame("FrameDemo");
+        
+        
+        
+        
+        nimi = (String) JOptionPane.showInputDialog(frame, "Write your name: ");
+        
+        WriteText.WriteName(nimi);
+
+        
+
+
+        
+        
+        
+        
+        
+        
+        
     }
 
     private float elapsed = 0;
     @Override
     public void render() {
+    	
+    	
+    	
+    	
+    	if(timeleft == 0) {
+    		abyhendus.Lisa(WriteText.ReadName(), Skoor);
+        	
+        	abyhendus.LoeAndmed();
+        	timeleft -= 1;
+    	} else if (timeleft > 0) {
+    		
+    		timeleft -= 1;
+    	
         camera.update();
         // Step the physics simulation forward at a rate of 60hz
         world.step(1f/60f, 6, 2);
@@ -263,7 +366,7 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
         
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
         	
-        	System.out.println("BOOM");
+        	//System.out.println("BOOM");
         	
         	//projectiles.add(juku.shoot(world));
         	
@@ -296,14 +399,17 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
                     sprite.getOriginY(),
                     sprite.getWidth(),sprite.getHeight(),sprite.getScaleX(),sprite.
                             getScaleY(),sprite.getRotation());
+        	target.drawProjectile(batch);
 
         font.draw(batch,
-                "Restitution: " + body.getFixtureList().first().getRestitution(),
+                "Skoor: " + Skoor + "  Time left: " + timeleft/60,
                 -Gdx.graphics.getWidth()/2,
                Gdx.graphics.getHeight()/2 );
         batch.end();
 
         debugRenderer.render(world, debugMatrix);
+        
+    	}
     }
 
     @Override
@@ -413,6 +519,27 @@ public class TopApp  extends ApplicationAdapter implements InputProcessor {/*
     public boolean scrolled(int amount) {
         return false;
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
     
     public static Vector2 getWorldMouse(){
     	Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
