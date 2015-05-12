@@ -29,11 +29,7 @@ public class ListenerClass implements ContactListener {
 	    Body a=contact.getFixtureA().getBody();
 	    Body b=contact.getFixtureB().getBody();
 	    a.getUserData();
-	    if(a.getUserData() instanceof Projectile&&b.getUserData() instanceof Target)
-	    {
-	    	System.out.println("ayy lmao");
-	    }
-	    
+
 	    MyUserTags myObject = (MyUserTags) a.getUserData();
 	    
 	    //System.out.println(((Projectile) a.getUserData()).getPosition());
