@@ -181,7 +181,7 @@ public class Tank {
     	
     	
 
-    		wheel1.applyTorque(0.01f, true);
+    		//wheel1.applyTorque(0.01f, true);
 
 
     	
