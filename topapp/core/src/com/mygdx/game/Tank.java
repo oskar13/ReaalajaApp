@@ -37,7 +37,7 @@ public class Tank {
     private Sprite wheel2Sprite;
    
     
-    private int fireRate = 100;
+    private int fireRate = 1;
     private int fireRateCooldown = 0;
     
     private BodyDef bodyDef = new BodyDef();

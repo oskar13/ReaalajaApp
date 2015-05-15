@@ -41,7 +41,7 @@ public class ListenerClass implements ContactListener {
 	    
 	    if (a.getUserData() != null) {
 	    	System.out.println("Skoor!!!!!");
-	    	TopApp.Skoor +=1;
+
 
 	    	
 	    }

@@ -19,11 +19,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
 public class Projectile {
-	private int mass;
-	private float posX;
-	private float posY;
-	private int speedX;
-	private int speedY;
 	private Texture projectileTexture;
     private Sprite projectileSprite;
     private BodyDef bodyDef = new BodyDef();
@@ -37,12 +32,6 @@ public class Projectile {
 	public Projectile(World world, float originX, float originY) {
 		projectileTexture = new Texture(Gdx.files.internal("assets/tankWheel.png"));
         projectileSprite = new Sprite(projectileTexture);
-        
-        //projectileSprite.setSize(projectileSprite.getWidth() * 0.5f,	projectileSprite.getHeight() * 0.5f);
-        
-        
-
-
         
         
         // We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
@@ -102,16 +91,8 @@ public class Projectile {
 	}
 	
 	public void drawProjectile(SpriteBatch batch) {
-		posX += speedX;
-		posY += speedY;
+
 				
-		
-		//projectileSprite.setX(posX);
-		//projectileSprite.setY(posY);
-		
-		//projectileSprite.setPosition(body.getPosition().x, body.getPosition().y);
-		//projectileSprite.setRotation(body.getAngle() * MathUtils.radDeg);
-		
 		projectileSprite.setPosition((body.getPosition().x * PIXELS_TO_METERS) - projectileSprite.getWidth()/2 ,
         (body.getPosition().y * PIXELS_TO_METERS) -projectileSprite.getHeight()/2 );
 		projectileSprite.setRotation((float)Math.toDegrees(body.getAngle()));
