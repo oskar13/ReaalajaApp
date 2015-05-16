@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -16,23 +17,41 @@ public class Sanic {
     private Sprite sanicSprite;
     
     private BodyDef bodyDef = new BodyDef();
-    private Body body;
+    Body body;
     
-    public Sanic(World world, float x, float y){
+    int ttlDead = 180;
+    Boolean isKill = false;
+    
+    public Sanic(World world, float worldX, float worldY){
     	sanicTexture = new Texture("assets/sanic.png");
     	sanicSprite = new Sprite(sanicTexture);
     	
         bodyDef.type = BodyType.DynamicBody;
-        bodyDef.position.set(x / TopApp.PIXELS_TO_METERS, y / TopApp.PIXELS_TO_METERS);
+        bodyDef.position.set(worldX, worldY);
         body = world.createBody(bodyDef);
+        body.setUserData(9);
         
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(sanicSprite.getWidth()/2 / TopApp.PIXELS_TO_METERS, sanicSprite.getHeight()/2 / TopApp.PIXELS_TO_METERS);
+        body.setUserData(666);
+        
+        
+        Vector2[] vertices = new Vector2[6];
+
+        vertices[0] = new Vector2(-0.9f, -0.9f);
+        vertices[1] = new Vector2(-1f, 0f);
+        vertices[2] = new Vector2(-0.4f, 1f);
+        vertices[3] = new Vector2(0.4f, 0.8f);
+        vertices[4] = new Vector2(1f, 0f);
+        vertices[5] = new Vector2(0.8f, -0.9f);
+		PolygonShape shape = new PolygonShape();
+		shape.set(vertices);
+        
+
+        //shape.setAsBox(sanicSprite.getWidth()/2 / TopApp.PIXELS_TO_METERS, sanicSprite.getHeight()/2 / TopApp.PIXELS_TO_METERS);
 
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 0.1f; 
+        fixtureDef.density = 0.8f; 
         fixtureDef.friction = 0.4f;
         fixtureDef.restitution = 0.2f; // Make it bounce a little bit
 
@@ -48,6 +67,16 @@ public class Sanic {
     	sanicSprite.setPosition((body.getPosition().x * TopApp.PIXELS_TO_METERS) - sanicSprite.getWidth()/2 ,
     	        (body.getPosition().y * TopApp.PIXELS_TO_METERS) -sanicSprite.getHeight()/2 );
     	sanicSprite.setRotation((float)Math.toDegrees(body.getAngle()));
+    	
+    	if (body.getUserData().equals(999)) {
+    		sanicSprite.setColor(1f,0.2f,0.2f,0.4f);	
+    		ttlDead -= 1;
+		}
+    	
+    	if (ttlDead == 0 ) {
+    		
+    		isKill = true;
+    	}
     	
     	sanicSprite.draw(batch);
     }

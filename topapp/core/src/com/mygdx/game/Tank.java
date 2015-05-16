@@ -74,10 +74,13 @@ public class Tank {
         
         
         body = world.createBody(bodyDef);
+        body.setUserData(9);
         
         //bodyDef.position.set(x / PIXELS_TO_METERS,  y / PIXELS_TO_METERS);
         wheel1 = world.createBody(bodyDef);
+        wheel1.setUserData(9);
         wheel2 = world.createBody(bodyDef);
+        wheel2.setUserData(9);
 
         CircleShape circle = new CircleShape();
         circle.setRadius(wheel1Sprite.getWidth()/2/ PIXELS_TO_METERS);

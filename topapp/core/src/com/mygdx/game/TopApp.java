@@ -28,16 +28,21 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.box2d.*;
 
+
+
+
 public class TopApp extends ApplicationAdapter implements InputProcessor {	
 
 	final static float PIXELS_TO_METERS = 100f;
 
 	Texture texture;
 	Texture hitTex;
+	Texture hitTexBig;
 	Matrix4 debugMatrix;
 	Box2DDebugRenderer debugRenderer;
 	static OrthographicCamera cam;
 	SpriteBatch batch;	
+
 	final Sprite[][] sprites = new Sprite[10][10];
 	//final Matrix4 matrix = new Matrix4();	
 	Sprite failMessage;
@@ -54,6 +59,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	
 	public ArrayList<Hitmarker> hitmarkers = new ArrayList<Hitmarker>();
+	public ArrayList<AnimationFx> fxs = new ArrayList<AnimationFx>();
 	
 	public ArrayList<Sanic> sanics = new ArrayList<Sanic>();
 	
@@ -61,7 +67,11 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	PointLight light1;
 	PointLight light2;
 	
+	public int killCount = 0;
+	
 	public static BitmapFont font1;
+	
+
 
 
 	@Override public void create() {
@@ -83,6 +93,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 		texture = new Texture(Gdx.files.internal("assets/fail.png"));	
 		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
+		hitTexBig = new Texture(Gdx.files.internal("assets/hitmarkerBig.png"));
 		debugRenderer = new Box2DDebugRenderer();
 		//cam = new OrthographicCamera(10, 10 * (Gdx.graphics.getHeight() / (float)Gdx.graphics.getWidth()));		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
@@ -109,6 +120,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 		batch = new SpriteBatch();
 
+
 		Gdx.input.setInputProcessor(this);
 
 		juku = new Tank(world, 59, 23);
@@ -130,6 +142,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		fixtureDef2.shape = edgeShape;
 
 		bodyEdgeScreen = world.createBody(bodyDef2);
+		bodyEdgeScreen.setUserData(9);
 		bodyEdgeScreen.createFixture(fixtureDef2);
 		edgeShape.dispose();
 
@@ -147,7 +160,10 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		rayHandler.setAmbientLight(0.35f, 0.4f, 0.35f, 1f);
 		
 		
-		sanics.add(new Sanic(world, 1, 1));
+		sanics.add(new Sanic(world, -1, 0));
+		
+
+		
 
 		
 
@@ -167,6 +183,23 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
                     body2.applyForceToCenter(0, MathUtils.random(20,50), true);
                 }
 				 */
+				if (contact.getFixtureA().getBody().getUserData().equals(666) && contact.getFixtureB().getBody().getUserData().equals(7)){
+					System.out.println("REKT");
+					Vector2[] contactPoints = contact.getWorldManifold().getPoints();
+					fxs.add(new AnimationFx("assets/explosion3.png", 4, 4,contactPoints[0].x,contactPoints[0].y));
+					
+					Hitmarker newhit = new Hitmarker(hitTexBig);
+					newhit.setPosition((contactPoints[0].x*PIXELS_TO_METERS) - newhit.getWidth()/2, (contactPoints[0].y*PIXELS_TO_METERS)- newhit.getHeight()/2);
+					hitmarkers.add(newhit);
+					
+					contact.getFixtureA().getBody().setUserData(999);
+					killCount +=1;
+					
+					hit.play(1f);
+					
+				} 
+				
+				//System.out.println(asdf);
 				
 				
 			}
@@ -183,28 +216,47 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			public void postSolve(Contact contact, ContactImpulse impulse) {
 				
 				
-				if (impulse.getNormalImpulses()[0] > 3f) {
-				System.out.println(impulse.getNormalImpulses()[0]);
-				
-				Vector2[] contactPoints = contact.getWorldManifold().getPoints();
-				//ArrayList<Vector2> asdf = contact.getWorldManifold().getPoints().length;
-				
-				
-				System.out.println(contact.toString());
-				
-				//for(int i =0; i < contactPoints.length; i++) {
-				int i = 0;
-					System.out.println("X: "+contactPoints[i].x);
-					System.out.println("Y: "+contactPoints[i].y);
+				if (impulse.getNormalImpulses()[0] > 9f) {
+					//System.out.println(impulse.getNormalImpulses()[0]);
 					
-					Hitmarker newhit = new Hitmarker(hitTex);
-					newhit.setOriginCenter();
-					newhit.setPosition((contactPoints[i].x*PIXELS_TO_METERS) - newhit.getWidth()/2, (contactPoints[i].y*PIXELS_TO_METERS) - newhit.getHeight()/2);
-					hitmarkers.add(newhit);
+					Vector2[] contactPoints = contact.getWorldManifold().getPoints();
+					//ArrayList<Vector2> asdf = contact.getWorldManifold().getPoints().length;
 					
-				//}
-				
-				hit.play(0.5f);
+					
+					System.out.println(contact.toString());
+
+					int i = 0;
+						Hitmarker newhit = new Hitmarker(hitTexBig);
+						newhit.setOriginCenter();
+						newhit.setPosition((contactPoints[i].x*PIXELS_TO_METERS) - newhit.getWidth()/2, (contactPoints[i].y*PIXELS_TO_METERS) - newhit.getHeight()/2);
+						hitmarkers.add(newhit);
+						
+						fxs.add(new AnimationFx("assets/explosion2.png", 10, 4,contactPoints[i].x,contactPoints[i].y));
+						
+						if (impulse.getNormalImpulses()[0] > 30f) {
+							fxs.add(new AnimationFx("assets/explosion1Big.png", 20, 1,contactPoints[i].x,contactPoints[i].y+0.4f,0.04f));
+						}
+
+
+					
+					hit.play(0.5f);
+				} else if (impulse.getNormalImpulses()[0] > 3f){
+					//System.out.println(impulse.getNormalImpulses()[0]);
+					
+					Vector2[] contactPoints = contact.getWorldManifold().getPoints();
+						
+					//for(int i =0; i < contactPoints.length; i++) {
+					int i = 0;
+						Hitmarker newhit = new Hitmarker(hitTex);
+						newhit.setOriginCenter();
+						newhit.setPosition((contactPoints[i].x*PIXELS_TO_METERS) - newhit.getWidth()/2, (contactPoints[i].y*PIXELS_TO_METERS) - newhit.getHeight()/2);
+						hitmarkers.add(newhit);
+
+
+						
+					//}
+					
+					hit.play(0.5f);
 				}
 				
 				
@@ -294,6 +346,8 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
+		
+		batch.setProjectionMatrix(cam.combined);
 
 		// Scale down the sprite batches projection matrix to box2D size
 		debugMatrix = batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, 
@@ -301,7 +355,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 
 
-		batch.setProjectionMatrix(cam.combined);
+		
 		//batch.setTransformMatrix(matrix);
 		batch.begin();
 		/*
@@ -318,7 +372,10 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	Projectile currentProjectile = it.next();
         	
         	currentProjectile.drawProjectile(batch);
-        	if (currentProjectile.getPosition()< -80) {
+        	if (currentProjectile.getPosition()< -8) {
+        		world.destroyBody(currentProjectile.body);
+        		currentProjectile.body.setUserData(null);
+        		currentProjectile.body = null;
         		it.remove();
         	} 	
         }
@@ -330,6 +387,13 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	Sanic currentSanic = sanicIt.next();
         	
         	currentSanic.render(batch);
+        	
+        	if (currentSanic.isKill) {
+        		world.destroyBody(currentSanic.body);
+        		currentSanic.body.setUserData(null);
+        		currentSanic.body = null;
+        		sanicIt.remove();
+        	} 	
 
         }
 
@@ -337,11 +401,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 		batch.end();
 		
-		
 
-		debugRenderer.render(world, debugMatrix);
-		
-		
 		
 		rayHandler.setCombinedMatrix( batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, 
 				PIXELS_TO_METERS, 0));
@@ -350,6 +410,19 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		//Stuff not to be lit
 		
 		batch.begin();
+		
+        Iterator<AnimationFx> fxit = fxs.iterator();
+        while (fxit.hasNext()) {
+        	AnimationFx currentFx = fxit.next();
+        	currentFx.draw(batch);
+        	if (currentFx.isKill()) {
+				fxit.remove();
+			} else {
+				
+			}
+        }
+		
+		
         Iterator<Hitmarker> it2 = hitmarkers.iterator();
         while (it2.hasNext()) {
         	Hitmarker currentHitmarker = it2.next();
@@ -364,17 +437,6 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         }
         
         
-        
-        
-        
-        
-        font1.setColor(new Color().YELLOW);
-        font1.draw(batch, "Hello World!", 0, 0);
-        
-        
-        
-        
-        
         if (failed) {
 
 			int  r = (int) (Math.random()+0.5);
@@ -385,6 +447,21 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			failMessage.draw(batch);
 		}
 		batch.end();
+		
+		debugRenderer.render(world, debugMatrix);
+		
+		/** Render without camera transformation **/
+		
+		batch.setProjectionMatrix(cam.combined);
+	    batch.begin();
+
+	    //failMessage.draw(batch);
+	        //font1.setColor(new Color().YELLOW);
+	        //font1.draw(batch, "hello World!", 0, 0);
+        
+	    batch.end();
+
+		
 		
 
 		checkTileTouched();

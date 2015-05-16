@@ -24,7 +24,7 @@ public class Projectile {
 	private Texture projectileTexture;
     private Sprite projectileSprite;
     private BodyDef bodyDef = new BodyDef();
-    private Body body;
+    Body body;
     private Fixture fixture;
     
     final float PIXELS_TO_METERS = 100f;
@@ -50,6 +50,7 @@ public class Projectile {
         (originY + projectileSprite.getHeight()/2) / PIXELS_TO_METERS);
         
         body = world.createBody(bodyDef);
+        body.setUserData(7);
         
         
         body.setTransform(body.getPosition().x, body.getPosition().y, getAngleRadians(TopApp.getWorldMouse().x/100f, originX/100f, TopApp.getWorldMouse().y/100f, originY/100f));
@@ -97,7 +98,7 @@ public class Projectile {
 
         
         
-        body.setUserData(new MyUserTags(1)); 
+
 
 	}
 	
