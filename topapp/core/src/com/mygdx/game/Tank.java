@@ -75,7 +75,7 @@ public class Tank {
         
         body = world.createBody(bodyDef);
         
-        bodyDef.position.set(x / PIXELS_TO_METERS,  y / PIXELS_TO_METERS);
+        //bodyDef.position.set(x / PIXELS_TO_METERS,  y / PIXELS_TO_METERS);
         wheel1 = world.createBody(bodyDef);
         wheel2 = world.createBody(bodyDef);
 

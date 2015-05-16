@@ -18,6 +18,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Plane;
@@ -28,7 +30,7 @@ import com.badlogic.gdx.physics.box2d.*;
 
 public class TopApp extends ApplicationAdapter implements InputProcessor {	
 
-	final float PIXELS_TO_METERS = 100f;
+	final static float PIXELS_TO_METERS = 100f;
 
 	Texture texture;
 	Texture hitTex;
@@ -38,33 +40,48 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	SpriteBatch batch;	
 	final Sprite[][] sprites = new Sprite[10][10];
 	//final Matrix4 matrix = new Matrix4();	
+	Sprite failMessage;
 
 	World world;
 	Sound horn;
 	Sound hit;
+	Sound sad;
 	private Tank juku;
 	Boolean followPlayer = false;
+	Boolean MLGcam= false;
+	Boolean failed = false;
 	Body bodyEdgeScreen;
 	public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	
 	public ArrayList<Hitmarker> hitmarkers = new ArrayList<Hitmarker>();
 	
+	public ArrayList<Sanic> sanics = new ArrayList<Sanic>();
+	
 	RayHandler rayHandler;
 	PointLight light1;
 	PointLight light2;
+	
+	public static BitmapFont font1;
 
 
 	@Override public void create() {
 		
-
+		
+		
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("assets/fonts/runescape.ttf"));
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 30;
+		font1 = generator.generateFont(parameter); // font size 12 pixels
+		generator.dispose(); // don't forget to dispose to avoid memory leaks!
 
 
 		world = new World(new Vector2(0, -2f),true);
 
 		horn = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/horn.mp3"));
 		hit = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/hitmarker.mp3"));
+		sad = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/sad.mp3"));
 
-		texture = new Texture(Gdx.files.internal("assets/doge.png"));	
+		texture = new Texture(Gdx.files.internal("assets/fail.png"));	
 		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
 		debugRenderer = new Box2DDebugRenderer();
 		//cam = new OrthographicCamera(10, 10 * (Gdx.graphics.getHeight() / (float)Gdx.graphics.getWidth()));		
@@ -82,6 +99,13 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 				sprites[x][y].setSize(1, 1);
 			}
 		}
+		
+		failMessage = new Sprite(texture);
+		failMessage.setOriginCenter();
+		failMessage.setPosition(-failMessage.getWidth()/2 , -failMessage.getHeight()/2 );
+		
+		
+		
 
 		batch = new SpriteBatch();
 
@@ -121,8 +145,11 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		
 		rayHandler.setAmbientLight(0.35f, 0.4f, 0.35f, 1f);
+		
+		
+		sanics.add(new Sanic(world, 1, 1));
 
-
+		
 
 		world.setContactListener(new ContactListener() {
 			@Override
@@ -204,14 +231,16 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 
 		/*
-		 * MLG 
-		Random rand = new Random();
-		int  n = rand.nextInt(20) + 1;
-		n= n-(n/2);
-		cam.up.set(0, 1, 0);
-		cam.rotate(n);
-		cam.position.set(n,n,cam.position.z);
-		*/
+		 * MLG */
+		if (MLGcam) {
+			Random rand = new Random();
+			int  n = rand.nextInt(20) + 1;
+			n= n-(n/2);
+			cam.up.set(0, 1, 0);
+			cam.rotate(n);
+			cam.position.set(n,n,cam.position.z);
+		}
+		
 		if (followPlayer) {
 			cam.position.set(juku.getX(),juku.getY()+Gdx.graphics.getHeight()/3,cam.position.z);
 		}
@@ -295,6 +324,16 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         }
 
         
+        
+        Iterator<Sanic> sanicIt = sanics.iterator();
+        while (sanicIt.hasNext()) {
+        	Sanic currentSanic = sanicIt.next();
+        	
+        	currentSanic.render(batch);
+
+        }
+
+        
 
 		batch.end();
 		
@@ -308,7 +347,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 				PIXELS_TO_METERS, 0));
 		rayHandler.updateAndRender();
 		
-		
+		//Stuff not to be lit
 		
 		batch.begin();
         Iterator<Hitmarker> it2 = hitmarkers.iterator();
@@ -323,6 +362,28 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	
         	
         }
+        
+        
+        
+        
+        
+        
+        font1.setColor(new Color().YELLOW);
+        font1.draw(batch, "Hello World!", 0, 0);
+        
+        
+        
+        
+        
+        if (failed) {
+
+			int  r = (int) (Math.random()+0.5);
+			int  g = (int) (Math.random()+0.5);
+			int  b = (int) (Math.random()+0.5);
+			
+        	failMessage.setColor(r, g, b, 1f);
+			failMessage.draw(batch);
+		}
 		batch.end();
 		
 
@@ -361,6 +422,10 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		if (keycode == Input.Keys.F) {
 			followPlayer = !followPlayer;
+		}
+		
+		if (keycode == Input.Keys.M) {
+			MLGcam = !MLGcam;
 		}
 		return false;
 	}
