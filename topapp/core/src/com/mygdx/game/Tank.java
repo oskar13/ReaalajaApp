@@ -53,13 +53,13 @@ public class Tank {
     public Tank(World world, int x, int y) {
 
    	
-    	hullTexture = new Texture(Gdx.files.internal("assets/tankHull.png"));
+    	hullTexture = new Texture(Gdx.files.internal("assets/tankHullMLG.png"));
         hullSprite = new Sprite(hullTexture);
         
-        barrelTexture = new Texture(Gdx.files.internal("assets/tankBarrel.png"));
+        barrelTexture = new Texture(Gdx.files.internal("assets/tankBarrelMLG.png"));
         barrelSprite = new Sprite(barrelTexture);
         
-        wheel1Texture = new Texture(Gdx.files.internal("assets/tankWheel.png"));
+        wheel1Texture = new Texture(Gdx.files.internal("assets/tankWheelMLG.png"));
         wheel1Sprite = new Sprite(wheel1Texture);
         wheel2Sprite = new Sprite(wheel1Texture);
         
@@ -213,7 +213,11 @@ public class Tank {
     }
     
     public float getX() {
-    	return hullSprite.getX();
+    	return body.getPosition().x * PIXELS_TO_METERS;
+    }
+    
+    public float getY() {
+    	return body.getPosition().y * PIXELS_TO_METERS;
     }
     
     public void shoot(World world, ArrayList list) {

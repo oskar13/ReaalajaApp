@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import java.util.Random;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -30,7 +32,12 @@ public class Projectile {
 	// constructor
 	
 	public Projectile(World world, float originX, float originY) {
-		projectileTexture = new Texture(Gdx.files.internal("assets/tankWheel.png"));
+		
+		Random rand = new Random();
+		
+		int  n = 1 + rand.nextInt((3 - 1) + 1);
+		
+		projectileTexture = new Texture(Gdx.files.internal("assets/projectiles/" + n + ".png"));
         projectileSprite = new Sprite(projectileTexture);
         
         
@@ -42,11 +49,10 @@ public class Projectile {
         bodyDef.position.set((originX + projectileSprite.getWidth()/2) / PIXELS_TO_METERS,
         (originY + projectileSprite.getHeight()/2) / PIXELS_TO_METERS);
         
-        
         body = world.createBody(bodyDef);
         
         
-        
+        body.setTransform(body.getPosition().x, body.getPosition().y, getAngleRadians(TopApp.getWorldMouse().x/100f, originX/100f, TopApp.getWorldMouse().y/100f, originY/100f));
 
         
         
@@ -64,7 +70,7 @@ public class Projectile {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 10f; 
-        fixtureDef.friction = 0.4f;
+        fixtureDef.friction = 0.7f;
         fixtureDef.restitution = 0.2f; // Make it bounce a little bit
 
 
@@ -80,6 +86,11 @@ public class Projectile {
 
         System.out.println("Mouse pos game X" +  TopApp.getWorldMouse().x + "   Y " +  TopApp.getWorldMouse().y );
         
+        
+        
+
+        
+
         
         //body.applyLinearImpulse(TopApp.getWorldMouse().x, TopApp.getWorldMouse().y,originX, originY,  true);
         body.setLinearVelocity((TopApp.getWorldMouse().x - originX)/100f, (TopApp.getWorldMouse().y - originY)/100f);
@@ -107,5 +118,16 @@ public class Projectile {
 		
 		
 	}
+	
+	
+    public float getAngleRadians(float x1, float y1, float x2, float y2) {
+        float angle = (float) Math.atan2(y2 - y1, x2 - x1);
+
+        if(angle < 0){
+            angle += 360;
+        }
+
+        return angle;
+    }
 	
 }

@@ -3,10 +3,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -27,6 +31,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	final float PIXELS_TO_METERS = 100f;
 
 	Texture texture;
+	Texture hitTex;
 	Matrix4 debugMatrix;
 	Box2DDebugRenderer debugRenderer;
 	static OrthographicCamera cam;
@@ -35,19 +40,32 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	//final Matrix4 matrix = new Matrix4();	
 
 	World world;
+	Sound horn;
+	Sound hit;
 	private Tank juku;
+	Boolean followPlayer = false;
 	Body bodyEdgeScreen;
 	public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+	
+	public ArrayList<Hitmarker> hitmarkers = new ArrayList<Hitmarker>();
+	
+	RayHandler rayHandler;
+	PointLight light1;
+	PointLight light2;
 
 
 	@Override public void create() {
+		
 
 
-		world = new World(new Vector2(0, -1f),true);
 
+		world = new World(new Vector2(0, -2f),true);
 
+		horn = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/horn.mp3"));
+		hit = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/hitmarker.mp3"));
 
 		texture = new Texture(Gdx.files.internal("assets/doge.png"));	
+		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
 		debugRenderer = new Box2DDebugRenderer();
 		//cam = new OrthographicCamera(10, 10 * (Gdx.graphics.getHeight() / (float)Gdx.graphics.getWidth()));		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
@@ -93,7 +111,16 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 
 
-
+		rayHandler = new RayHandler(world);
+		
+		RayHandler.useDiffuseLight(true);
+		
+		light1 = new PointLight(rayHandler, 5000, new Color().PURPLE, 13, -6, 6);
+		
+		light2 = new PointLight(rayHandler, 5000, new Color(0.8f, 0.4f, 0.2f, 1f), 13, 6, 6);
+		
+		
+		rayHandler.setAmbientLight(0.35f, 0.4f, 0.35f, 1f);
 
 
 
@@ -113,6 +140,8 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
                     body2.applyForceToCenter(0, MathUtils.random(20,50), true);
                 }
 				 */
+				
+				
 			}
 
 			@Override
@@ -125,6 +154,33 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 			@Override
 			public void postSolve(Contact contact, ContactImpulse impulse) {
+				
+				
+				if (impulse.getNormalImpulses()[0] > 3f) {
+				System.out.println(impulse.getNormalImpulses()[0]);
+				
+				Vector2[] contactPoints = contact.getWorldManifold().getPoints();
+				//ArrayList<Vector2> asdf = contact.getWorldManifold().getPoints().length;
+				
+				
+				System.out.println(contact.toString());
+				
+				//for(int i =0; i < contactPoints.length; i++) {
+				int i = 0;
+					System.out.println("X: "+contactPoints[i].x);
+					System.out.println("Y: "+contactPoints[i].y);
+					
+					Hitmarker newhit = new Hitmarker(hitTex);
+					newhit.setOriginCenter();
+					newhit.setPosition((contactPoints[i].x*PIXELS_TO_METERS) - newhit.getWidth()/2, (contactPoints[i].y*PIXELS_TO_METERS) - newhit.getHeight()/2);
+					hitmarkers.add(newhit);
+					
+				//}
+				
+				hit.play(0.5f);
+				}
+				
+				
 			}
 		});
 	}
@@ -156,6 +212,9 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		cam.rotate(n);
 		cam.position.set(n,n,cam.position.z);
 		*/
+		if (followPlayer) {
+			cam.position.set(juku.getX(),juku.getY()+Gdx.graphics.getHeight()/3,cam.position.z);
+		}
 
 		if(Gdx.input.isKeyPressed(Input.Keys.Q)){
 
@@ -216,12 +275,13 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		batch.setProjectionMatrix(cam.combined);
 		//batch.setTransformMatrix(matrix);
 		batch.begin();
+		/*
 		for(int y = 0; y < 10; y++) {
 			for(int x = 0; x < 10; x++) {
 				sprites[x][y].draw(batch);
 			}
 		}
-
+*/
 		juku.drawTank(batch);
 		
         Iterator<Projectile> it = projectiles.iterator();
@@ -231,15 +291,40 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	currentProjectile.drawProjectile(batch);
         	if (currentProjectile.getPosition()< -80) {
         		it.remove();
-        	}
-        	
-        	
+        	} 	
         }
+
         
 
 		batch.end();
+		
+		
 
 		debugRenderer.render(world, debugMatrix);
+		
+		
+		
+		rayHandler.setCombinedMatrix( batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, 
+				PIXELS_TO_METERS, 0));
+		rayHandler.updateAndRender();
+		
+		
+		
+		batch.begin();
+        Iterator<Hitmarker> it2 = hitmarkers.iterator();
+        while (it2.hasNext()) {
+        	Hitmarker currentHitmarker = it2.next();
+        	currentHitmarker.draw(batch);
+        	if (currentHitmarker.isKill()) {
+				it2.remove();
+			} else {
+				
+			}
+        	
+        	
+        }
+		batch.end();
+		
 
 		checkTileTouched();
 	}
@@ -266,12 +351,17 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			}
 
 			juku.shoot(world, projectiles);
+			horn.play(0.6f);
 		}
 	}
 
 	@Override
 	public boolean keyDown(int keycode) {
 		// TODO Auto-generated method stub
+		
+		if (keycode == Input.Keys.F) {
+			followPlayer = !followPlayer;
+		}
 		return false;
 	}
 

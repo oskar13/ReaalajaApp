@@ -12,7 +12,12 @@ public class DesktopLauncher {
 		//config.useGL20 = true;
 		//config.fullscreen = true;
 		config.height = 720;
-		config.width = 1920;	
+		//config.height = 1080;
+		config.width = 1920;
+		
+		//config.useCPUSynch = false;
+		config.vSyncEnabled = true;
+
 		
 		new LwjglApplication(new TopApp(), config);
 		
