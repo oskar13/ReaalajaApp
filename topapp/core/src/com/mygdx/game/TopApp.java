@@ -27,9 +27,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.box2d.*;
-
-
-
+import com.mygdx.game.Achievement.AchievementType;
 
 public class TopApp extends ApplicationAdapter implements InputProcessor {	
 
@@ -42,7 +40,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	Box2DDebugRenderer debugRenderer;
 	static OrthographicCamera cam;
 	SpriteBatch batch;	
-
+	SpriteBatch HUDBatch;
 	final Sprite[][] sprites = new Sprite[10][10];
 	//final Matrix4 matrix = new Matrix4();	
 	Sprite failMessage;
@@ -50,11 +48,12 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	World world;
 	Sound horn;
 	Sound hit;
-	Sound sad;
+	Sound achievementNotifiaction, triple;
+	Sound sad, failed;
 	private Tank juku;
 	Boolean followPlayer = false;
 	Boolean MLGcam= false;
-	Boolean failed = false;
+	Boolean failedSanic = false;
 	Body bodyEdgeScreen;
 	public static ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	
@@ -63,11 +62,19 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	
 	public ArrayList<Sanic> sanics = new ArrayList<Sanic>();
 	
+	public ArrayList<Achievement> achievements = new ArrayList<Achievement>();
+	
 	RayHandler rayHandler;
 	PointLight light1;
 	PointLight light2;
 	
 	public int killCount = 0;
+	
+	int sonicCooldown = 0;
+	int shotsFired = 0;
+	
+	public static float posX;
+	public static float posY;
 	
 	public static BitmapFont font1;
 	
@@ -90,6 +97,9 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		horn = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/horn.mp3"));
 		hit = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/hitmarker.mp3"));
 		sad = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/sad.mp3"));
+		failed = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/failed.mp3"));
+		achievementNotifiaction = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/achievement.mp3"));
+		triple = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/triple.mp3"));
 
 		texture = new Texture(Gdx.files.internal("assets/fail.png"));	
 		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
@@ -119,11 +129,15 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 
 		batch = new SpriteBatch();
-
+		HUDBatch = new SpriteBatch();
 
 		Gdx.input.setInputProcessor(this);
 
-		juku = new Tank(world, 59, 23);
+		juku = new Tank(world, 3, 0);
+		
+		
+		
+
 
 
         BodyDef bodyDef2 = new BodyDef();
@@ -160,9 +174,8 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		rayHandler.setAmbientLight(0.35f, 0.4f, 0.35f, 1f);
 		
 		
-		sanics.add(new Sanic(world, -1, 0));
 		
-
+		
 		
 
 		
@@ -183,7 +196,8 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
                     body2.applyForceToCenter(0, MathUtils.random(20,50), true);
                 }
 				 */
-				if (contact.getFixtureA().getBody().getUserData().equals(666) && contact.getFixtureB().getBody().getUserData().equals(7)){
+				if ((contact.getFixtureA().getBody().getUserData().equals(666) && contact.getFixtureB().getBody().getUserData().equals(7))||
+						(contact.getFixtureB().getBody().getUserData().equals(666) && contact.getFixtureA().getBody().getUserData().equals(7))){
 					System.out.println("REKT");
 					Vector2[] contactPoints = contact.getWorldManifold().getPoints();
 					fxs.add(new AnimationFx("assets/explosion3.png", 4, 4,contactPoints[0].x,contactPoints[0].y));
@@ -192,12 +206,54 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 					newhit.setPosition((contactPoints[0].x*PIXELS_TO_METERS) - newhit.getWidth()/2, (contactPoints[0].y*PIXELS_TO_METERS)- newhit.getHeight()/2);
 					hitmarkers.add(newhit);
 					
-					contact.getFixtureA().getBody().setUserData(999);
+					if (contact.getFixtureA().getBody().getUserData().equals(666)) {
+						contact.getFixtureA().getBody().setUserData(999);
+					} else {
+						contact.getFixtureB().getBody().setUserData(999);
+					}
+
 					killCount +=1;
+					
+					if (killCount == 3) {
+						achievements.add(new Achievement(Achievement.AchievementType.TRIPLE));
+						achievementNotifiaction.play(1f);
+						triple.play(1f);
+					}else if (killCount == 12) {
+						achievements.add(new Achievement(Achievement.AchievementType.MOM));
+						achievementNotifiaction.play(1f);
+					}else if (killCount == 100) {
+						achievements.add(new Achievement(Achievement.AchievementType.SENPAI));
+						achievementNotifiaction.play(1f);
+					}
 					
 					hit.play(1f);
 					
 				} 
+				
+				if (!failedSanic) {
+				
+					if ((contact.getFixtureA().getBody().getUserData().equals(666) && contact.getFixtureB().getBody().getUserData().equals(8))||
+							(contact.getFixtureB().getBody().getUserData().equals(666) && contact.getFixtureA().getBody().getUserData().equals(8))){
+						MLGcam = true;
+						failedSanic = true;
+						
+						fxs.add(new AnimationFx("assets/explosion1Big.png", 20, 1,posX,posY,0.04f));
+						
+						achievements.add(new Achievement(Achievement.AchievementType.HEADPHONES));
+						
+						for (int i = 0; i < 20; i++) {
+							Hitmarker newhit = new Hitmarker(hitTexBig);
+
+							newhit.setOriginCenter();
+							newhit.setPosition(posX*PIXELS_TO_METERS+randInt(-100, 100),posY*PIXELS_TO_METERS+randInt(-100, 100));
+							hitmarkers.add(newhit);
+						}
+						hit.play(1f);
+						sad.play(0.8f);
+						failed.play(1f);
+						
+					}
+				}
 				
 				//System.out.println(asdf);
 				
@@ -233,7 +289,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 						
 						fxs.add(new AnimationFx("assets/explosion2.png", 10, 4,contactPoints[i].x,contactPoints[i].y));
 						
-						if (impulse.getNormalImpulses()[0] > 30f) {
+						if (impulse.getNormalImpulses()[0] > 20f) {
 							fxs.add(new AnimationFx("assets/explosion1Big.png", 20, 1,contactPoints[i].x,contactPoints[i].y+0.4f,0.04f));
 						}
 
@@ -269,6 +325,25 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		cam.update();
 		// Step the physics simulation forward at a rate of 60hz
 		world.step(1f/60f, 6, 2);
+		
+		
+		posX = juku.getX();
+		posY = juku.getY();
+		
+		
+		if (sonicCooldown < 0) {
+			
+			sonicCooldown = randInt(60, 400);
+			sanics.add(new Sanic(world, randInt(-5, -1), randInt(1, 5)));
+		}
+		sonicCooldown -= 1;
+		
+		
+
+		
+
+		
+		
 
 
 		if(Gdx.input.isKeyPressed(Input.Keys.W)){
@@ -286,15 +361,15 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		 * MLG */
 		if (MLGcam) {
 			Random rand = new Random();
-			int  n = rand.nextInt(20) + 1;
+			int  n = randInt(0, 20);
 			n= n-(n/2);
 			cam.up.set(0, 1, 0);
 			cam.rotate(n);
-			cam.position.set(n,n,cam.position.z);
+			cam.position.set(randInt(0, 20),randInt(0, 20),cam.position.z);
 		}
 		
 		if (followPlayer) {
-			cam.position.set(juku.getX(),juku.getY()+Gdx.graphics.getHeight()/3,cam.position.z);
+			cam.position.set(juku.getX()*PIXELS_TO_METERS,juku.getY()*PIXELS_TO_METERS+Gdx.graphics.getHeight()/3,cam.position.z);
 		}
 
 		if(Gdx.input.isKeyPressed(Input.Keys.Q)){
@@ -350,8 +425,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		batch.setProjectionMatrix(cam.combined);
 
 		// Scale down the sprite batches projection matrix to box2D size
-		debugMatrix = batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, 
-				PIXELS_TO_METERS, 0);
+		debugMatrix = batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS, PIXELS_TO_METERS, 0);
 
 
 
@@ -372,7 +446,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	Projectile currentProjectile = it.next();
         	
         	currentProjectile.drawProjectile(batch);
-        	if (currentProjectile.getPosition()< -8) {
+        	if (currentProjectile.getPosition()< -8f) {
         		world.destroyBody(currentProjectile.body);
         		currentProjectile.body.setUserData(null);
         		currentProjectile.body = null;
@@ -388,7 +462,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	
         	currentSanic.render(batch);
         	
-        	if (currentSanic.isKill) {
+        	if (currentSanic.isKill || currentSanic.getY()<-8f) {
         		world.destroyBody(currentSanic.body);
         		currentSanic.body.setUserData(null);
         		currentSanic.body = null;
@@ -396,6 +470,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	} 	
 
         }
+
 
         
 
@@ -432,12 +507,17 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			} else {
 				
 			}
-        	
-        	
         }
         
         
-        if (failed) {
+        Iterator<Sanic> sanicNameIt = sanics.iterator();
+        while (sanicNameIt.hasNext()) {
+        	Sanic currentSanic = sanicNameIt.next();
+        	currentSanic.renderName(batch, font1);
+        }
+        
+        
+        if (failedSanic) {
 
 			int  r = (int) (Math.random()+0.5);
 			int  g = (int) (Math.random()+0.5);
@@ -446,20 +526,35 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         	failMessage.setColor(r, g, b, 1f);
 			failMessage.draw(batch);
 		}
+        
+        
+
+        font1.setColor(new Color().YELLOW);
+        font1.draw(batch, "hello World!", cam.position.x, cam.position.y);
+        
+        
+        Iterator<Achievement> achit = achievements.iterator();
+        while (achit.hasNext()) {
+        	Achievement currentAchievement= achit.next();
+        	currentAchievement.render(batch);
+        	if (currentAchievement.isKill) {
+        		achit.remove();
+			} else {
+				
+			}
+        }
+
+
+        
 		batch.end();
 		
 		debugRenderer.render(world, debugMatrix);
 		
-		/** Render without camera transformation **/
-		
-		batch.setProjectionMatrix(cam.combined);
-	    batch.begin();
 
-	    //failMessage.draw(batch);
-	        //font1.setColor(new Color().YELLOW);
-	        //font1.draw(batch, "hello World!", 0, 0);
+
+
         
-	    batch.end();
+
 
 		
 		
@@ -489,6 +584,11 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			}
 
 			juku.shoot(world, projectiles);
+			shotsFired +=1;
+			if (shotsFired == 420) {
+				achievements.add(new Achievement(Achievement.AchievementType.BLAZEIT));
+				achievementNotifiaction.play(1f);
+			}
 			horn.play(0.6f);
 		}
 	}
@@ -562,6 +662,81 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		return new Vector2(x, y);
 
 	}
+	
+	
+	/**
+	 * Returns a psuedo-random number between min and max, inclusive.
+	 * The difference between min and max can be at most
+	 * <code>Integer.MAX_VALUE - 1</code>.
+	 *
+	 * @param min Minimim value
+	 * @param max Maximim value.  Must be greater than min.
+	 * @return Integer between min and max, inclusive.
+	 * @see java.util.Random#nextInt(int)
+	 */
+	public static int randInt(int min, int max) {
 
+	    // Usually this can be a field rather than a method variable
+	    Random rand = new Random();
+
+	    // nextInt is normally exclusive of the top value,
+	    // so add 1 to make it inclusive
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
+
+	    return randomNum;
+	}
+	
+	
+	
+	public static String RandomNameGenerator() {
+		 String[] names = new String[43];
+
+		 names[0] = "Snipar";
+		 names[1] = "MLG";
+		 names[2] = "BL4zE";
+		 names[3] = "Ayy";
+		 names[4] = "LMA0";
+		 names[5] = "#R3kt";
+		 names[6] = "Ku$H";
+		 names[7] = "L0RD";
+		 names[8] = "G4BeN";
+		 names[9] = "Gabe";
+		 names[10] = "Kawaii";
+		 names[11] = "Killa";
+		 names[12] = "Noob";
+		 names[13] = "Pro";
+		 names[14] = "9/11";
+		 names[15] = "Weed";
+		 names[16] = "Doge";
+		 names[17] = "KaWaii";
+		 names[18] = "kek";
+		 names[19] = "TOP";
+		 names[20] = "top";
+		 names[21] = "C0D";
+		 names[22] = "Global";
+		 names[23] = "Magg0t";
+		 names[24] = "Goyim";
+		 names[25] = "0bama";
+		 names[26] = "#Shrekt";
+		 names[27] = "Sug0i";
+		 names[28] = "d0g3";
+		 names[29] = "Solid";
+		 names[30] = "NavySeal";
+		 names[31] = "Elite";
+		 names[32] = "BlackOps";
+		 names[33] = "#Y0L0";
+		 names[34] = "Tr0LL";
+		 names[35] = "Retard";
+		 names[36] = "Hurr";
+		 names[37] = "Woof";
+		 names[38] = "Senpai";
+		 names[39] = "Baka";
+		 names[40] = "Desu";
+		 names[41] = "Swag";
+		 names[42] = "#Swag";
+		 
+		 return new String("xXx_" + names[randInt(0,42)] + names[randInt(0,42)] +"_xXx");
+		
+	}
 
 }

@@ -1,7 +1,10 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -21,10 +24,13 @@ public class Sanic {
     
     int ttlDead = 180;
     Boolean isKill = false;
+    String name = "Sample Text";
     
     public Sanic(World world, float worldX, float worldY){
     	sanicTexture = new Texture("assets/sanic.png");
     	sanicSprite = new Sprite(sanicTexture);
+    	
+    	name = TopApp.RandomNameGenerator();
     	
         bodyDef.type = BodyType.DynamicBody;
         bodyDef.position.set(worldX, worldY);
@@ -64,10 +70,27 @@ public class Sanic {
     
     public void render(Batch batch) {
     	
+    	//body.setTransform(TopApp.posX-body.getPosition().x,0 /*body.getPosition().y+TopApp.posY*/, 0);
+    	
+    	
+        float velocity = 1;
+
+        Vector2 sp = new Vector2(body.getPosition());
+        Vector2 jp = new Vector2(TopApp.posX,TopApp.posY);
+
+        Vector2 delta = jp.sub(sp).nor(); // This is not a unit vector pointing in the direction from ap to mp
+
+        // Take alien current position and add the delta times velocity times delta-time
+        Vector2 newPos = new Vector2(body.getPosition());
+        //newPos.add(delta);
+        newPos.add(delta.scl(velocity * Gdx.graphics.getDeltaTime()));
+        
+        body.setTransform(newPos, body.getAngle());
+    	
     	sanicSprite.setPosition((body.getPosition().x * TopApp.PIXELS_TO_METERS) - sanicSprite.getWidth()/2 ,
     	        (body.getPosition().y * TopApp.PIXELS_TO_METERS) -sanicSprite.getHeight()/2 );
     	sanicSprite.setRotation((float)Math.toDegrees(body.getAngle()));
-    	
+        	
     	if (body.getUserData().equals(999)) {
     		sanicSprite.setColor(1f,0.2f,0.2f,0.4f);	
     		ttlDead -= 1;
@@ -79,6 +102,19 @@ public class Sanic {
     	}
     	
     	sanicSprite.draw(batch);
+    }
+    
+    public void renderName(Batch batch, BitmapFont font) {
+    	
+  	
+    	font.setColor(new Color().YELLOW);
+        font.draw(batch, name, (body.getPosition().x * TopApp.PIXELS_TO_METERS) - sanicSprite.getWidth()/2,
+    	        (body.getPosition().y * TopApp.PIXELS_TO_METERS) +sanicSprite.getHeight()/1.7f);
+
+    }
+    
+    public float getY() {
+    	return body.getPosition().y;
     }
 
 }

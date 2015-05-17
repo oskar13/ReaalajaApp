@@ -69,12 +69,11 @@ public class Tank {
         // Set our body's starting position in the world
         //bodyDef.position.set(originX, originY);
         
-        bodyDef.position.set(x / PIXELS_TO_METERS,
-        y / PIXELS_TO_METERS);
+        bodyDef.position.set(x , y );
         
         
         body = world.createBody(bodyDef);
-        body.setUserData(9);
+        body.setUserData(8);
         
         //bodyDef.position.set(x / PIXELS_TO_METERS,  y / PIXELS_TO_METERS);
         wheel1 = world.createBody(bodyDef);
@@ -216,11 +215,11 @@ public class Tank {
     }
     
     public float getX() {
-    	return body.getPosition().x * PIXELS_TO_METERS;
+    	return body.getPosition().x;
     }
     
     public float getY() {
-    	return body.getPosition().y * PIXELS_TO_METERS;
+    	return body.getPosition().y;
     }
     
     public void shoot(World world, ArrayList list) {
