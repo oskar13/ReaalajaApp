@@ -25,6 +25,7 @@ public class Sanic {
     int ttlDead = 180;
     Boolean isKill = false;
     String name = "Sample Text";
+    float velocity = 1f;
     
     public Sanic(World world, float worldX, float worldY){
     	sanicTexture = new Texture("assets/sanic.png");
@@ -84,6 +85,7 @@ public class Sanic {
         Vector2 newPos = new Vector2(body.getPosition());
         //newPos.add(delta);
         newPos.add(delta.scl(velocity * Gdx.graphics.getDeltaTime()));
+
         
         body.setTransform(newPos, body.getAngle());
     	
@@ -94,6 +96,7 @@ public class Sanic {
     	if (body.getUserData().equals(999)) {
     		sanicSprite.setColor(1f,0.2f,0.2f,0.4f);	
     		ttlDead -= 1;
+    		velocity = 99900f;
 		}
     	
     	if (ttlDead == 0 ) {

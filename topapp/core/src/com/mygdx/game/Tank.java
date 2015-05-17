@@ -45,7 +45,13 @@ public class Tank {
     
     
     private Body wheel1, wheel2;
-    private Joint motor1;
+    
+    RevoluteJoint motor1;
+
+    
+    RevoluteJointDef rjd;
+    
+    int DriveFrame;
     
     
     final float PIXELS_TO_METERS = 100f;
@@ -88,7 +94,7 @@ public class Tank {
         FixtureDef fixtureDefWheel = new FixtureDef();
         fixtureDefWheel.shape = circle;
         fixtureDefWheel.density = 10f; 
-        fixtureDefWheel.friction = 0.9f;
+        fixtureDefWheel.friction = 5f;
         fixtureDefWheel.restitution = 0.2f; // Make it bounce a little bit
         
      // Create our fixture and attach it to the body
@@ -119,20 +125,36 @@ public class Tank {
         
         
 
-        RevoluteJointDef rjd=new RevoluteJointDef();
+        rjd=new RevoluteJointDef();
         rjd.bodyA=body;
         rjd.bodyB=wheel1;
         rjd.localAnchorA.set(hullSprite.getWidth()/3 / PIXELS_TO_METERS,-hullSprite.getHeight()/2 / PIXELS_TO_METERS);
         rjd.localAnchorB.set(0,0);
         rjd.collideConnected=false;
-        world.createJoint(rjd);
+        rjd.enableMotor = true;
+        rjd.motorSpeed = 1f;
+        rjd.maxMotorTorque = 1f;
         
-        rjd.bodyA=body;
-        rjd.bodyB=wheel2;
-        rjd.localAnchorA.set(-hullSprite.getWidth()/3 / PIXELS_TO_METERS,-hullSprite.getHeight()/2 / PIXELS_TO_METERS);
-        rjd.localAnchorB.set(0,0);
-        rjd.collideConnected=false;
-        world.createJoint(rjd);
+        //motor1 = world.createJoint(rjd);
+        
+        motor1 = (RevoluteJoint)world.createJoint(rjd);
+        
+        //rjd.motorSpeed = 99f;
+        
+        
+        /*
+        motor1.SetMotorSpeed();
+        motor1.setUserData(userData);
+        motor1.SetMaxMotorTorque(input.isPressed(40) || input.isPressed(38) ? 17 : 0.5);*/
+        
+        
+        RevoluteJointDef rjd2=new RevoluteJointDef();
+        rjd2.bodyA=body;
+        rjd2.bodyB=wheel2;
+        rjd2.localAnchorA.set(-hullSprite.getWidth()/3 / PIXELS_TO_METERS,-hullSprite.getHeight()/2 / PIXELS_TO_METERS);
+        rjd2.localAnchorB.set(0,0);
+        rjd2.collideConnected=false;
+        world.createJoint(rjd2);
 
 
 
@@ -201,6 +223,13 @@ public class Tank {
     		fireRateCooldown -= 1;
     	} 
     	
+    	
+    	if (DriveFrame>0) {
+			
+    		DriveFrame -=1;
+		} else {
+			motor1.setMotorSpeed(0);
+		}
 
 
     }
@@ -241,6 +270,18 @@ public class Tank {
         }
 
         return angle;
+    }
+    
+    
+    public void driveLeft(){
+    	motor1.setMotorSpeed(10f);
+    	DriveFrame = 30;
+    }
+    
+    public void driveRight(){
+    	motor1.setMotorSpeed(-10f);
+    	DriveFrame = 30;
+	
     }
 
     

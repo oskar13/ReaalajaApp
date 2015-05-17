@@ -26,7 +26,9 @@ public class Projectile {
     private BodyDef bodyDef = new BodyDef();
     Body body;
     private Fixture fixture;
+    Boolean isKill = false;
     
+    int ttl = 1000;
     final float PIXELS_TO_METERS = 100f;
 	
 	// constructor
@@ -103,12 +105,21 @@ public class Projectile {
 	}
 	
 	public void drawProjectile(SpriteBatch batch) {
-
+		
 				
 		projectileSprite.setPosition((body.getPosition().x * PIXELS_TO_METERS) - projectileSprite.getWidth()/2 ,
         (body.getPosition().y * PIXELS_TO_METERS) -projectileSprite.getHeight()/2 );
 		projectileSprite.setRotation((float)Math.toDegrees(body.getAngle()));
 		
+    	if (body.getUserData().equals(420)) {
+    		projectileSprite.setColor(1f,1f,1f,0.6f);	
+    		ttl -=1;
+		}
+		
+    	if (ttl < 0) {
+			isKill = true;
+		}
+    	
 		projectileSprite.draw(batch);
 	}
 	

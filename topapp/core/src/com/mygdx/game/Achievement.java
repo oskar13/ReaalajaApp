@@ -20,7 +20,11 @@ public class Achievement {
 		
 	    switch (type)
 	    {
+	      case ACCURACY:		path="assets/achievements/accuracy.png";
+	      break;
 	      case BLAZEIT:		path="assets/achievements/blazeit.png";
+	      break;
+	      case CLIPPY:  	path="assets/achievements/clippy.png";
 	      break;
 	      case HEADPHONES:	path="assets/achievements/headphones.png";
 	      break;
@@ -30,8 +34,11 @@ public class Achievement {
 	      break;
 	      case SENPAI:  	path="assets/achievements/senpai.png";
 	      break;
+	      case TOOLONG:  	path="assets/achievements/toolong.png";
+	      break;
 	      case TRIPLE:  	path="assets/achievements/triple.png";
 	      break;
+	      
 	      default:        path="assets/achievements/error.png";;
 	    }
 	    achievementTexture  = new Texture(path);
@@ -77,6 +84,6 @@ public class Achievement {
 		
 	};
 	
-	public static enum AchievementType { BLAZEIT, HEADPHONES, MOM, QUICKTIME, SENPAI, TRIPLE };
+	public static enum AchievementType {ACCURACY, BLAZEIT,CLIPPY , HEADPHONES, MOM, QUICKTIME, SENPAI, TOOLONG,TRIPLE };
 
 }

@@ -36,6 +36,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	Texture texture;
 	Texture hitTex;
 	Texture hitTexBig;
+	Texture platformTexture;
 	Matrix4 debugMatrix;
 	Box2DDebugRenderer debugRenderer;
 	static OrthographicCamera cam;
@@ -44,6 +45,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	final Sprite[][] sprites = new Sprite[10][10];
 	//final Matrix4 matrix = new Matrix4();	
 	Sprite failMessage;
+	Sprite platformSprite;
 
 	World world;
 	Sound horn;
@@ -72,6 +74,11 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	
 	int sonicCooldown = 0;
 	int shotsFired = 0;
+
+	int fiveMinuteAchievement = 5*60*60;
+	
+	Boolean runOnce = true;
+	Boolean accuracyAchievement = false;
 	
 	public static float posX;
 	public static float posY;
@@ -87,7 +94,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("assets/fonts/runescape.ttf"));
 		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 30;
+		parameter.size = 25;
 		font1 = generator.generateFont(parameter); // font size 12 pixels
 		generator.dispose(); // don't forget to dispose to avoid memory leaks!
 
@@ -104,6 +111,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		texture = new Texture(Gdx.files.internal("assets/fail.png"));	
 		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
 		hitTexBig = new Texture(Gdx.files.internal("assets/hitmarkerBig.png"));
+		platformTexture = new Texture(Gdx.files.internal("assets/platform.png"));
 		debugRenderer = new Box2DDebugRenderer();
 		//cam = new OrthographicCamera(10, 10 * (Gdx.graphics.getHeight() / (float)Gdx.graphics.getWidth()));		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
@@ -138,27 +146,41 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		
 
+		platformSprite = new Sprite(platformTexture);
 
 
         BodyDef bodyDef2 = new BodyDef();
         bodyDef2.type = BodyDef.BodyType.StaticBody;
-        float w = Gdx.graphics.getWidth()/PIXELS_TO_METERS;
+        
         // Set the height to just 50 pixels above the bottom of the screen so we can see the edge in the
         // debug renderer
-        float h = Gdx.graphics.getHeight()/PIXELS_TO_METERS- 50/PIXELS_TO_METERS;
+        //float h = Gdx.graphics.getHeight()/PIXELS_TO_METERS- 50/PIXELS_TO_METERS;
         //bodyDef2.position.set(0,
 //                h-10/PIXELS_TO_METERS);
         bodyDef2.position.set(0,0);
 
-		FixtureDef fixtureDef2 = new FixtureDef();
-		EdgeShape edgeShape = new EdgeShape();
-		edgeShape.set(-w/2,-h/2,w/2,-h/2);
-		fixtureDef2.shape = edgeShape;
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(platformSprite.getWidth()/2 / PIXELS_TO_METERS, platformSprite.getHeight()/2 / PIXELS_TO_METERS);
+        
+        // Create a fixture definition to apply our shape to
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 10f; 
+        fixtureDef.friction = 0.4f;
+        fixtureDef.restitution = 0.2f; // Make it bounce a little bit
+
+        bodyDef2.position.set(0,0-((Gdx.graphics.getHeight()/PIXELS_TO_METERS)-( 50/PIXELS_TO_METERS))/2);
 
 		bodyEdgeScreen = world.createBody(bodyDef2);
-		bodyEdgeScreen.setUserData(9);
-		bodyEdgeScreen.createFixture(fixtureDef2);
-		edgeShape.dispose();
+		bodyEdgeScreen.setUserData(420);
+		bodyEdgeScreen.createFixture(fixtureDef);
+
+
+		
+		
+		
+
+
 
 
 
@@ -170,8 +192,11 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		light2 = new PointLight(rayHandler, 5000, new Color(0.8f, 0.4f, 0.2f, 1f), 13, 6, 6);
 		
+		PointLight light3 = new PointLight(rayHandler, 5000, new Color(0.8f, 0.8f, 0.2f, 1f), 13, 15, -6);
+		
 		
 		rayHandler.setAmbientLight(0.35f, 0.4f, 0.35f, 1f);
+		//rayHandler.setAmbientLight(0.25f, 0.30f, 0.25f, 1f);
 		
 		
 		
@@ -255,7 +280,37 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 					}
 				}
 				
-				//System.out.println(asdf);
+				
+
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				if ((contact.getFixtureA().getBody().getUserData().equals(420) && contact.getFixtureB().getBody().getUserData().equals(7))||
+						(contact.getFixtureB().getBody().getUserData().equals(420) && contact.getFixtureA().getBody().getUserData().equals(7))){
+
+					
+					if (contact.getFixtureA().getBody().getUserData().equals(7)) {
+						contact.getFixtureA().getBody().setUserData(420);
+					} else {
+						contact.getFixtureB().getBody().setUserData(420);
+					}
+					
+				}
+				
+				
+				
+				
+				
+				
+				
+				
 				
 				
 			}
@@ -341,11 +396,32 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 
 		
-
+		if (runOnce) {
+			achievements.add(new Achievement(Achievement.AchievementType.CLIPPY));
+			runOnce = false;
+		}
+		
+		if (fiveMinuteAchievement == 1) {
+			achievements.add(new Achievement(Achievement.AchievementType.TOOLONG));
+			achievementNotifiaction.play();
+			fiveMinuteAchievement -=1;
+		} else if(fiveMinuteAchievement > 0){
+			fiveMinuteAchievement -=1;
+		}
+		
+		if (!accuracyAchievement) {
+			if (shotsFired>30) {
+				if((killCount/shotsFired)<0.3f){
+					achievements.add(new Achievement(Achievement.AchievementType.ACCURACY));
+					achievementNotifiaction.play();
+					accuracyAchievement = true;
+				}
+			}
+		}
 		
 		
 
-
+/*
 		if(Gdx.input.isKeyPressed(Input.Keys.W)){
 			cam.rotate(-0.3f);
 		}
@@ -353,7 +429,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyPressed(Input.Keys.S)){
 			cam.rotate(0.3f);
 		}
-		
+		*/
 		
 		
 
@@ -372,7 +448,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			cam.position.set(juku.getX()*PIXELS_TO_METERS,juku.getY()*PIXELS_TO_METERS+Gdx.graphics.getHeight()/3,cam.position.z);
 		}
 
-		if(Gdx.input.isKeyPressed(Input.Keys.Q)){
+		/*if(Gdx.input.isKeyPressed(Input.Keys.Q)){
 
 			cam.zoom += 0.01;
 			
@@ -393,6 +469,18 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 			}
 
 			System.out.println("zoom: " + cam.zoom );
+
+		}*/
+		
+		if(Gdx.input.isKeyPressed(Input.Keys.A)){
+
+			juku.driveLeft();
+
+		}
+		
+		if(Gdx.input.isKeyPressed(Input.Keys.D)){
+
+			juku.driveRight();
 
 		}
 
@@ -441,12 +529,20 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 */
 		juku.drawTank(batch);
 		
+		
+		
+		platformSprite.setPosition((bodyEdgeScreen.getPosition().x * TopApp.PIXELS_TO_METERS) - platformSprite.getWidth()/2 ,
+    	        (bodyEdgeScreen.getPosition().y * TopApp.PIXELS_TO_METERS) -platformSprite.getHeight()/2 );
+		platformSprite.draw(batch);
+		
+		
+		
         Iterator<Projectile> it = projectiles.iterator();
         while (it.hasNext()) {
         	Projectile currentProjectile = it.next();
         	
         	currentProjectile.drawProjectile(batch);
-        	if (currentProjectile.getPosition()< -8f) {
+        	if (currentProjectile.getPosition()< -8f || currentProjectile.isKill) {
         		world.destroyBody(currentProjectile.body);
         		currentProjectile.body.setUserData(null);
         		currentProjectile.body = null;
@@ -530,7 +626,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         
 
         font1.setColor(new Color().YELLOW);
-        font1.draw(batch, "hello World!", cam.position.x, cam.position.y);
+        font1.draw(batch, "Kill count:" + killCount, cam.position.x- Gdx.graphics.getWidth()/2+20, cam.position.y+Gdx.graphics.getHeight()/4);
         
         
         Iterator<Achievement> achit = achievements.iterator();
@@ -548,7 +644,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         
 		batch.end();
 		
-		debugRenderer.render(world, debugMatrix);
+		//debugRenderer.render(world, debugMatrix);
 		
 
 
@@ -603,6 +699,10 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		if (keycode == Input.Keys.M) {
 			MLGcam = !MLGcam;
+		}
+		
+		if (keycode == Input.Keys.U) {
+
 		}
 		return false;
 	}
@@ -689,7 +789,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	
 	
 	public static String RandomNameGenerator() {
-		 String[] names = new String[43];
+		 String[] names = new String[54];
 
 		 names[0] = "Snipar";
 		 names[1] = "MLG";
@@ -711,7 +811,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		 names[17] = "KaWaii";
 		 names[18] = "kek";
 		 names[19] = "TOP";
-		 names[20] = "top";
+		 names[20] = "Loli";
 		 names[21] = "C0D";
 		 names[22] = "Global";
 		 names[23] = "Magg0t";
@@ -734,8 +834,20 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		 names[40] = "Desu";
 		 names[41] = "Swag";
 		 names[42] = "#Swag";
+		 names[43] = "Weeabo";
+		 names[44] = "Weeb";
+		 names[45] = "CS:GO";
+		 names[46] = "Gangsta";
+		 names[47] = "Level99";
+		 names[48] = "Moe";
+		 names[49] = "IsKill";
+		 names[50] = "Hard";
+		 names[51] = "Crusher";
+		 names[52] = "420";
+		 names[53] = "1337";
 		 
-		 return new String("xXx_" + names[randInt(0,42)] + names[randInt(0,42)] +"_xXx");
+		 
+		 return new String("xXx_" + names[randInt(0,53)] + names[randInt(0,53)] +"_xXx");
 		
 	}
 
