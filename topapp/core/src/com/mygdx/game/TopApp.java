@@ -18,8 +18,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+//import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+//import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Plane;
@@ -92,11 +92,16 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 		
 		
-		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("assets/fonts/runescape.ttf"));
-		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-		parameter.size = 25;
-		font1 = generator.generateFont(parameter); // font size 12 pixels
-		generator.dispose(); // don't forget to dispose to avoid memory leaks!
+		/*FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("assets/fonts/runescape.ttf"));
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();*/
+		//parameter.size = 25;
+		
+		//font1 = new BitmapFont(Gdx.files.internal("assets/fonts/font.fnt"), false);//100 is the font name you can give your font any name
+		
+		//font1 = generator.generateFont(parameter); // font size 12 pixels
+		//generator.dispose(); // don't forget to dispose to avoid memory leaks!
+
+		
 
 
 		world = new World(new Vector2(0, -2f),true);
@@ -108,6 +113,11 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		achievementNotifiaction = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/achievement.mp3"));
 		triple = Gdx.audio.newSound(Gdx.files.internal("assets/sounds/triple.mp3"));
 
+		font1 = new BitmapFont(Gdx.files.internal("assets/fonts/font.fnt"), false);//100 is the font name you can give your font any name
+
+		
+		
+		
 		texture = new Texture(Gdx.files.internal("assets/fail.png"));	
 		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
 		hitTexBig = new Texture(Gdx.files.internal("assets/hitmarkerBig.png"));

@@ -8,5 +8,7 @@
 	<inherits name='TopApp' />
 	<entry-point class='com.mygdx.game.client.HtmlLauncher' />
 	
-	<set-configuration-property name="gdx.assetpath" value="../android/assets" />
+	<set-configuration-property name="gdx.assetpath" value="../desktop/assets" />
+	
+	
 </module>
