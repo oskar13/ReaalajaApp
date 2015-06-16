@@ -27,6 +27,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.mygdx.game.Achievement.AchievementType;
 
 public class TopApp extends ApplicationAdapter implements InputProcessor {	
@@ -37,6 +40,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	Texture hitTex;
 	Texture hitTexBig;
 	Texture platformTexture;
+	Texture chatTex;
 	Matrix4 debugMatrix;
 	Box2DDebugRenderer debugRenderer;
 	static OrthographicCamera cam;
@@ -46,6 +50,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	//final Matrix4 matrix = new Matrix4();	
 	Sprite failMessage;
 	Sprite platformSprite;
+	Sprite chatSprite;
 
 	World world;
 	Sound horn;
@@ -85,7 +90,9 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 	
 	public static BitmapFont font1;
 	
-
+    private Skin skin;
+    private Stage stage;
+    private TextArea textMessage;
 
 
 	@Override public void create() {
@@ -103,6 +110,21 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 
 		
 
+		
+        // Load our UI skin from file.  Once again, I used the files included in the tests.
+        // Make sure default.fnt, default.png, uiskin.[atlas/json/png] are all added to your assets
+        skin = new Skin(Gdx.files.internal("data/uiskin.json"));
+        stage = new Stage();
+        // Wire the stage to receive input, as we are using Scene2d in this example
+        Gdx.input.setInputProcessor(stage);
+		
+        textMessage = new TextArea("",skin);
+        
+        stage.addActor(textMessage);
+        
+        stage.setKeyboardFocus(textMessage);
+        
+		
 
 		world = new World(new Vector2(0, -2f),true);
 
@@ -122,6 +144,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		hitTex = new Texture(Gdx.files.internal("assets/hitmarker.png"));
 		hitTexBig = new Texture(Gdx.files.internal("assets/hitmarkerBig.png"));
 		platformTexture = new Texture(Gdx.files.internal("assets/platform.png"));
+		chatTex = new Texture(Gdx.files.internal("assets/chat.png"));
 		debugRenderer = new Box2DDebugRenderer();
 		//cam = new OrthographicCamera(10, 10 * (Gdx.graphics.getHeight() / (float)Gdx.graphics.getWidth()));		
 		cam = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
@@ -149,7 +172,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		batch = new SpriteBatch();
 		HUDBatch = new SpriteBatch();
 
-		Gdx.input.setInputProcessor(this);
+;
 
 		juku = new Tank(world, 3, 0);
 		
@@ -157,6 +180,7 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
 		
 
 		platformSprite = new Sprite(platformTexture);
+		chatSprite = new Sprite(chatTex);
 
 
         BodyDef bodyDef2 = new BodyDef();
@@ -651,6 +675,16 @@ public class TopApp extends ApplicationAdapter implements InputProcessor {
         }
 
 
+        
+        
+        
+        textMessage.draw(batch, 0.9f);
+        
+//System.out.println(textMessage.getText());
+//Submit text
+if(textMessage.getText().contains("\n")) {
+	textMessage.setText("");
+}
         
 		batch.end();
 		
